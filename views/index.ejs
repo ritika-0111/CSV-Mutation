@@ -1,0 +1,149 @@
+<%- include('header.ejs') %>
+
+
+  <!-- Sidebar Toggler (Sidebar) -->
+  <div class="text-center d-none d-md-inline">
+    <button class="rounded-circle border-0" id="sidebarToggle"></button>
+  </div>
+
+  </ul>
+  <!-- End of Sidebar -->
+
+  <!-- Content Wrapper -->
+  <div id="content-wrapper" class="d-flex flex-column">
+
+    <!-- Main Content -->
+    <div id="content">
+
+      <!-- Begin Page Content -->
+      <div class="container-fluid">
+
+        <!-- DataTales Example -->
+        <div class="card shadow mb-4">
+          <div class="card-header py-3">
+            <h6 class="mb-2 font-weight-bold text-gray-800" style="text-align: center;">CSV File</h6>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                <thead>
+                  <tr>
+                    <th>Id</th>
+                    <th>Utterance</th>
+                    <th>Sentiments</th>
+                  </tr>
+                </thead>
+                <tfoot>
+                  <tr>
+                    <th>Id</th>
+                    <th>Utterance</th>
+                    <th>Sentiments</th>
+                  </tr>
+                </tfoot>
+                <tbody>
+
+                  <% if(utterance){%>
+                    <% if(utterance.length!=0){ %>
+                      <% let i; for (i=0; i < utterance.length; i++) { %>
+                        <tr>
+                          <% let j=i%>
+                            <td>
+                              <%= j +1 %>
+                            </td>
+                            <td>
+                              <%= utterance[i]%>
+                            </td>
+
+                            <td>
+                              <% if((sentiments[i].length==0) || (sentiments[i].length==1)){ %>
+                                <form action="/addSentiment" method="POST">
+                                  <select name="sentiment" id="sentiment">
+                                    <option value="routine">routine</option>
+                                    <option value="symp/reasoning">symp/reasoning</option>
+                                    <option value="story">story</option>
+                                    <option value="inactive">inactive</option>
+                                  </select>
+                                  <input type="text" name="id" type="id" value="<%=i%>" style="display: none;">
+                                  <input type="submit" value="submit">
+                                </form>
+                                <%}else{%>
+                                  <%= sentiments[i] %>
+                                    <%}%>
+                            </td>
+                        </tr>
+                        <% }%>
+
+                          <%}%>
+                            <%}%>
+
+                              <tr>
+                                <td></td>
+                                <td>Reference Summary</td>
+                                <td><input type="text" class="form-control" name="summary" id="summary"
+                                    placeholder="Reference Summary"></td>
+                              </tr>
+                              <tr>
+                                <td></td>
+                                <td>Primary Topic</td>
+                                <td><input type="text" class="form-control" name="primary_topic" id="primary_topic"
+                                    placeholder="Primary Topic"></td>
+                              </tr>
+                              <tr>
+                                <td></td>
+                                <td>Secondary Topic</td>
+                                <td><input type="text" class="form-control" name="secondary_topic" id="secondary_topic"
+                                    placeholder="Secondary Topic"></td>
+                              </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <!-- /.container-fluid -->
+      <div class="col-sm-2 mb-3 mb-sm-0 mx-auto mt-5" style="text-align: right;">
+        <a id="gencsv2" class="csv-generate"><button onclick="downloadcsv();"
+            class="btn btn-dark btn-user btn-block">Generate CSV</button></a>
+        <br>
+        <a id="downloadCSV" class="d-none" href="/public/expcsv/new.csv" download><button
+            class="btn btn-success btn-user btn-block">Download CSV</button>
+        </a>
+        <br><br>
+      </div>
+    </div>
+    <!-- End of Main Content -->
+
+  </div>
+  <!-- End of Content Wrapper -->
+
+  <!-- End of Page Wrapper -->
+
+  <!-- Scroll to Top Button-->
+  <a class="scroll-to-top rounded" href="#page-top">
+    <i class="fas fa-angle-up"></i>
+  </a>
+  
+  <script type="text/javascript">
+    function downloadcsv() {
+      $.ajax({
+        url: "/exportcsv",
+        method: "POST",
+        data: {
+          "primary_topic": $('#primary_topic').val(),
+          "secondary_topic": $('#secondary_topic').val(),
+          "summary" : $('#summary').val(),
+        },
+        success: function (response) {
+          console.log(response);
+          $("#gencsv").removeClass("csv-generate");
+          $("#gencsv").addClass("d-none");
+          $("#downloadCSV").removeClass("d-none");
+          $("#downloadCSV").click()
+
+        }
+      });
+    }
+
+  </script>
+  <%- include('footer.ejs') %>
