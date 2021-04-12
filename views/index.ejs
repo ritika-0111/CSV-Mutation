@@ -43,7 +43,10 @@
                 <tbody>
 
                   <% if(utterance){%>
-                    <% if(utterance.length!=0){ %>
+                    <% if(utterance.length!=0){
+                      let len = utterance.length %>
+                       <input type="text" class="form-control" name="csv_length" id="csv_length"
+                       value="<%= len%>" hidden>
                       <% let i; for (i=0; i < utterance.length; i++) { %>
                         <tr>
                           <% let j=i%>
@@ -80,7 +83,8 @@
                                 <td></td>
                                 <td>Reference Summary</td>
                                 <td><input type="text" class="form-control" name="summary" id="summary"
-                                    placeholder="Reference Summary"></td>
+                                    placeholder="Reference Summary">
+                                  </td>
                               </tr>
                               <tr>
                                 <td></td>
@@ -103,7 +107,7 @@
       </div>
       <!-- /.container-fluid -->
       <div class="col-sm-2 mb-3 mb-sm-0 mx-auto mt-5" style="text-align: right;">
-        <a id="gencsv2" class="csv-generate"><button onclick="downloadcsv();"
+        <a id="gencsv2"><button onclick="downloadcsv();"
             class="btn btn-dark btn-user btn-block">Generate CSV</button></a>
         <br>
         <a id="downloadCSV" class="d-none" href="/public/expcsv/new.csv" download><button
@@ -126,6 +130,7 @@
   
   <script type="text/javascript">
     function downloadcsv() {
+  
       $.ajax({
         url: "/exportcsv",
         method: "POST",
@@ -133,10 +138,11 @@
           "primary_topic": $('#primary_topic').val(),
           "secondary_topic": $('#secondary_topic').val(),
           "summary" : $('#summary').val(),
+          "len_csv" : $('#csv_length').val(),
+
         },
         success: function (response) {
           console.log(response);
-          $("#gencsv").removeClass("csv-generate");
           $("#gencsv").addClass("d-none");
           $("#downloadCSV").removeClass("d-none");
           $("#downloadCSV").click()

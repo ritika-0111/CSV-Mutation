@@ -94,17 +94,7 @@ router.post('/exportcsv', (req, res) => {
     let fileString = fs.readFileSync(path, "utf-8");
     fs.writeFileSync(file, data)
     let values = fileString.split('\r\n').length;
-
-    for (let i = 0; i <= fileString.split('\r\n').length; i++) {
-        row = fileString.split('\r\n')[i]
-        console.log("row", row)
-        if (typeof row == "undefined" || row == "")
-            break
-        console.log("row 0", row.split(',')[0])
-        console.log("row 1", row.split(',')[1])
-        utterance.push(row.split(',')[0])
-        sentiments.push(row.split(',')[1])
-    }
+    console.log("values", fileString.split('\r\n'));
 
     for (let i = 0; i < values + 3; i++) {
         (function (i)  {
