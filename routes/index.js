@@ -58,7 +58,7 @@ router.post('/addSentiment', (req, res, next) => {
     let utterance = []
     let sentiments = []
     fs.writeFileSync(file, data)
-    console.log('result',fileString.split('\r\n').length);
+    console.log('result', fileString.split('\r\n').length);
     for (let i = 0; i < fileString.split('\r\n').length; i++) {
         row = fileString.split('\r\n')[i]
         console.log("rowww", row, i)
@@ -82,47 +82,49 @@ router.post('/addSentiment', (req, res, next) => {
 // export csv file, 
 router.post('/exportcsv', (req, res) => {
     let summary = req.body.summary;
-    let primary_topic = req.body.primary_topic;
-    let secondary_topic = req.body.secondary_topic;
-    console.log("summary", secondary_topic);
+    let primary = req.body.primary_topic;
+    let secondary = req.body.secondary_topic;
+    let len = req.body.csv_length;
+    console.log("summary", secondary, len);
     let file = "public/expcsv/new.csv";
     let utterance = []
     let sentiments = []
     let data = ""
-
+    let head = "summary,primary_topic,secondary_topic";
+    let value = summary + "," + primary + "," + secondary;
     let path = "public/uploads/csv-new.csv";
     let fileString = fs.readFileSync(path, "utf-8");
-    fs.writeFileSync(file, data)
-    let values = fileString.split('\r\n').length;
-    console.log("values", fileString.split('\r\n'));
+    for (let i = 0; i <= fileString.split('\r\n').length; i++) {
+        row = fileString.split('\r\n')[i]
+        console.log("row", row)
+        if (typeof row == "undefined" || row == "")
+            break
+        utterance.push(row.split(',')[0])
+        sentiments.push(row.split(',')[1])
+    }
+    utterance.push(head.split(',')[0])
+    sentiments.push(value.split(',')[0])
 
-    for (let i = 0; i < values + 3; i++) {
-        (function (i)  {
-            if (i < values) {
-                if(utterance){
-                utterance = utterance[i];
-                sentiments = sentiments[i];
-                }
+    utterance.push(head.split(',')[1])
+    sentiments.push(value.split(',')[1])
+
+    utterance.push(head.split(',')[2])
+    sentiments.push(value.split(',')[2])
+
+    fs.writeFileSync(file, data);
+    console.log("utttt", utterance);
+    console.log("sentt", sentiments);
+    for (let k = 0; k < len + 3; k++) {
+        (function (k) {
+            if (utterance[k] != undefined) {
+
+                utter = utterance[k];
+                senti = sentiments[k];
+                data = `${utter},${senti}\r\n`
+
+                fs.appendFileSync(file, data)
             }
-            else {
-                if (i == values) {
-                    utterance = "summary";
-                    sentiments = summary;
-                }
-                if (i == values + 1) {
-                    utterance = "primary_topic";
-                    sentiments = primary_topic;
-                }
-
-                if (i == values + 2) {
-                    utterance = "secondary_topic";
-                    sentiments = secondary_topic;
-                }
-
-            }
-            data = `${utterance},${sentiments}\r\n`
-            fs.appendFileSync(file, data)
-        })(i)
+        })(k)
     }
     res.download(file);
 });
