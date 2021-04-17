@@ -34,44 +34,94 @@ router.get("/csvfile", (req, res) => {
     let file = "public/uploads/csv-new.csv";
     let fileString = fs.readFileSync(file, "utf-8");
     let utterance = []
-    let sentiments = []
+    let subtopic = []
+    let types = []
+    let dialogact = []
+    let emotion = []
+    let id = []
     let row = ''
     for (let i = 0; i <= fileString.split('\r\n').length; i++) {
         row = fileString.split('\r\n')[i]
-        console.log("row", row)
+        console.log("row", row);
         if (typeof row == "undefined" || row == "")
             break
-        utterance.push(row.split(',')[0])
-        sentiments.push(row.split(',')[1])
+
+        if (row[0] == '"') {
+            let word = row.lastIndexOf('"')
+            let str = row.substr(0, word + 1);
+            utterance.push(str.replace(/['"]+/g, ''));
+            let senti = row.substr(word + 2,)
+
+            subtopic.push(senti.split(',')[0])
+            id.push(senti.split(',')[1])
+            types.push(senti.split(',')[2])
+            dialogact.push(senti.split(',')[3])
+            emotion.push(senti.split(',')[4])
+
+        } else {
+            utterance.push(row.split(',')[0])
+            subtopic.push(row.split(',')[1])
+            id.push(row.split(',')[2])
+            types.push(row.split(',')[3])
+            dialogact.push(row.split(',')[4])
+            emotion.push(row.split(',')[5])
+        }
     }
-    res.render("index", { utterance, sentiments });
+
+    res.render("index", { utterance, subtopic, types, dialogact, emotion, id });
 });
 
-// Post route to add Sentiments
+// Post route to add subtopic
 router.post('/addSentiment', (req, res, next) => {
-    let id = req.body.id;
-    console.log("data, id", id);
+    let reqid = req.body.id;
+    console.log("data, id", reqid);
     let file = "public/uploads/csv-new.csv";
     let fileString = fs.readFileSync(file, "utf-8");
     let data = ""
     let row = ''
     let utterance = []
-    let sentiments = []
+    let subtopic = []
+    let types = []
+    let dialogact = []
+    let emotion = []
+    let id = []
     fs.writeFileSync(file, data)
     console.log('result', fileString.split('\r\n').length);
     for (let i = 0; i < fileString.split('\r\n').length; i++) {
         row = fileString.split('\r\n')[i]
-        console.log("rowww", row, i)
         if (typeof row == "undefined" || row == "")
             break
         (function (i) {
-            utterance = row.split(',')[0];
-            if (i == id) {
-                sentiments = req.body.sentiment
+            if (row[0] == '"') {
+                let word = row.lastIndexOf('"')
+                let str = row.substr(0, word + 1);
+                utterance = str;
+                let senti = row.substr(word + 2,)
+
+                if (i == reqid) {
+                    subtopic = req.body.sentiment
+                } else {
+                    subtopic = senti.split(',')[0]
+                }
+
+                id = senti.split(',')[1];
+                types = senti.split(',')[2];
+                dialogact = senti.split(',')[3];
+                emotion = senti.split(',')[4];
             } else {
-                sentiments = row.split(',')[1]
+                if (i == reqid) {
+                    subtopic = req.body.sentiment
+                } else {
+                    subtopic = row.split(',')[1]
+                }
+                utterance = row.split(',')[0];
+                id = row.split(',')[2];
+                types = row.split(',')[3];
+                dialogact = row.split(',')[4];
+                emotion = row.split(',')[5];
             }
-            data = `${utterance},${sentiments}\r\n`
+
+            data = `${utterance},${subtopic},${id},${types},${dialogact},${emotion}\r\n`
             fs.appendFileSync(file, data)
         })(i)
     }
@@ -85,10 +135,13 @@ router.post('/exportcsv', (req, res) => {
     let primary = req.body.primary_topic;
     let secondary = req.body.secondary_topic;
     let len = req.body.csv_length;
-    console.log("summary", secondary, len);
     let file = "public/expcsv/new.csv";
     let utterance = []
-    let sentiments = []
+    let subtopic = []
+    let types = []
+    let dialogact = []
+    let emotion = []
+    let id = []
     let data = ""
     let head = "summary,primary_topic,secondary_topic";
     let value = summary + "," + primary + "," + secondary;
@@ -99,28 +152,53 @@ router.post('/exportcsv', (req, res) => {
         console.log("row", row)
         if (typeof row == "undefined" || row == "")
             break
-        utterance.push(row.split(',')[0])
-        sentiments.push(row.split(',')[1])
+        if (row[0] == '"') {
+            let word = row.lastIndexOf('"')
+            console.log("wodddd", row.substr( 0,word));
+            let str = row.substr(0, word + 1);
+            utterance.push(str);
+            let senti = row.substr(word + 2,)
+
+            subtopic.push(senti.split(',')[0])
+            id.push(senti.split(',')[1])
+            types.push(senti.split(',')[2])
+            dialogact.push(senti.split(',')[3])
+            emotion.push(senti.split(',')[4])
+
+        } else {
+            utterance.push(row.split(',')[0])
+            subtopic.push(row.split(',')[1])
+            id.push(row.split(',')[2])
+            types.push(row.split(',')[3])
+            dialogact.push(row.split(',')[4])
+            emotion.push(row.split(',')[5])
+        }
+
     }
-    utterance.push(head.split(',')[0])
-    sentiments.push(value.split(',')[0])
+    for (let l = 0; l < 3; l++) {
+        utterance.push(head.split(',')[l])
+        subtopic.push(value.split(',')[l])
+        id.push("")
+        types.push("")
+        dialogact.push("")
+        emotion.push("")
+    }
 
-    utterance.push(head.split(',')[1])
-    sentiments.push(value.split(',')[1])
-
-    utterance.push(head.split(',')[2])
-    sentiments.push(value.split(',')[2])
 
     fs.writeFileSync(file, data);
     console.log("utttt", utterance);
-    console.log("sentt", sentiments);
+    console.log("sentt", subtopic);
     for (let k = 0; k < len + 3; k++) {
         (function (k) {
             if (utterance[k] != undefined) {
 
                 utter = utterance[k];
-                senti = sentiments[k];
-                data = `${utter},${senti}\r\n`
+                senti = subtopic[k];
+                ids = id[k];
+                type = types[k];
+                dialogs = dialogact[k];
+                emotions = emotion[k];
+                data = `${utter},${senti},${ids},${type},${dialogs},${emotions}\r\n`
 
                 fs.appendFileSync(file, data)
             }

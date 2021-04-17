@@ -28,16 +28,22 @@
               <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                 <thead>
                   <tr>
-                    <th>Id</th>
+                    <th>ID</th>
                     <th>Utterance</th>
-                    <th>Sentiments</th>
+                    <th>Sub-Topic</th>
+                    <th>Type</th>
+                    <th>Dialog_Act</th>
+                    <th>Emotion</th>
                   </tr>
                 </thead>
                 <tfoot>
                   <tr>
-                    <th>Id</th>
+                    <th>ID</th>
                     <th>Utterance</th>
-                    <th>Sentiments</th>
+                    <th>Sub-Topic</th>
+                    <th>Type</th>
+                    <th>Dialog_Act</th>
+                    <th>Emotion</th>
                   </tr>
                 </tfoot>
                 <tbody>
@@ -49,16 +55,15 @@
                        value="<%= len%>" hidden>
                       <% let i; for (i=0; i < utterance.length; i++) { %>
                         <tr>
-                          <% let j=i%>
                             <td>
-                              <%= j +1 %>
+                              <%= id[i] %>
                             </td>
                             <td>
                               <%= utterance[i]%>
                             </td>
 
                             <td>
-                              <% if((sentiments[i].length==0) || (sentiments[i].length==1)){ %>
+                              <% if((subtopic[i].length==0) || (subtopic[i].length==1)){ %>
                                 <form action="/addSentiment" method="POST">
                                   <select name="sentiment" id="sentiment">
                                     <option value="routine">routine</option>
@@ -70,9 +75,12 @@
                                   <input type="submit" value="submit">
                                 </form>
                                 <%}else{%>
-                                  <%= sentiments[i] %>
+                                  <%= subtopic[i] %>
                                     <%}%>
                             </td>
+                            <td><%= types[i]%></td>
+                            <td><%= dialogact[i]%></td>
+                            <td><%= emotion[i]%></td>
                         </tr>
                         <% }%>
 
@@ -85,18 +93,27 @@
                                 <td><input type="text" class="form-control" name="summary" id="summary"
                                     placeholder="Reference Summary">
                                   </td>
+                                  <td></td>
+                                  <td></td>
+                                  <td></td>
                               </tr>
                               <tr>
                                 <td></td>
                                 <td>Primary Topic</td>
                                 <td><input type="text" class="form-control" name="primary_topic" id="primary_topic"
                                     placeholder="Primary Topic"></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
                               </tr>
                               <tr>
                                 <td></td>
                                 <td>Secondary Topic</td>
                                 <td><input type="text" class="form-control" name="secondary_topic" id="secondary_topic"
                                     placeholder="Secondary Topic"></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
                               </tr>
                 </tbody>
               </table>
@@ -107,7 +124,7 @@
       </div>
       <!-- /.container-fluid -->
       <div class="col-sm-2 mb-3 mb-sm-0 mx-auto mt-5" style="text-align: right;">
-        <a id="gencsv2"><button onclick="downloadcsv();"
+        <a id="gencsv"><button onclick="downloadcsv();"
             class="btn btn-dark btn-user btn-block">Generate CSV</button></a>
         <br>
         <a id="downloadCSV" class="d-none" href="/public/expcsv/new.csv" download><button
@@ -130,7 +147,7 @@
   
   <script type="text/javascript">
     function downloadcsv() {
-  
+      $("#gencsv").addClass("d-none");
       $.ajax({
         url: "/exportcsv",
         method: "POST",
@@ -142,8 +159,6 @@
 
         },
         success: function (response) {
-          console.log(response);
-          $("#gencsv").addClass("d-none");
           $("#downloadCSV").removeClass("d-none");
           $("#downloadCSV").click()
 
