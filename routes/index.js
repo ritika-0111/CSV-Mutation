@@ -42,7 +42,7 @@ router.get("/csvfile", (req, res) => {
     let row = ''
     for (let i = 0; i <= fileString.split('\r\n').length; i++) {
         row = fileString.split('\r\n')[i]
-        console.log("row", row);
+        //  console.log("row", row);
         if (typeof row == "undefined" || row == "")
             break
 
@@ -68,7 +68,7 @@ router.get("/csvfile", (req, res) => {
         }
     }
 
-    res.render("index", { utterance, subtopic, types, dialogact, emotion, id });
+    res.render("home", { utterance, subtopic, types, dialogact, emotion, id });
 });
 
 // Post route to add subtopic
@@ -128,6 +128,72 @@ router.post('/addSentiment', (req, res, next) => {
     res.redirect("/csvfile");
 });
 
+router.post('/editcsv', (req, res) => {
+    let edit = req.body;
+    let file = "public/uploads/csv-new.csv";
+    let fileString = fs.readFileSync(file, "utf-8");
+    let data = ""
+    let row = ''
+    let utterance = []
+    let subtopic = []
+    let types = []
+    let dialogact = []
+    let emotion = []
+    let id = []
+    let reqid = []
+    let value = []
+    fs.writeFileSync(file, data)
+    for (var key in edit) {
+        // console.log("edit", key);
+        reqid.push(key);
+        // console.log("edit", edit[key]);
+        value.push(edit[key]);
+
+    }
+    console.log("check", reqid[4])
+    for (let i = 0; i < fileString.split('\r\n').length; i++) {
+        row = fileString.split('\r\n')[i]
+        if (typeof row == "undefined" || row == "")
+            break
+        (function (i) {
+            console.log("check", row[0])
+
+            if (row[0] == '"') {
+                let word = row.lastIndexOf('"')
+                let str = row.substr(0, word + 1);
+                utterance = str;
+                let senti = row.substr(word + 2,)
+
+                if ((reqid[i]) && (i == reqid[i])) {
+                    subtopic = value[i]
+                } else {
+                    subtopic = senti.split(',')[0]
+                }
+
+                id = senti.split(',')[1];
+                types = senti.split(',')[2];
+                dialogact = senti.split(',')[3];
+                emotion = senti.split(',')[4];
+            } else {
+                if ((reqid[i]) && (i == reqid[i])) {
+                    subtopic = value[i]
+                } else {
+                    subtopic = row.split(',')[1]
+                }
+                utterance = row.split(',')[0];
+                id = row.split(',')[2];
+                types = row.split(',')[3];
+                dialogact = row.split(',')[4];
+                emotion = row.split(',')[5];
+            }
+            console.log("subtopic", subtopic);
+
+            data = `${utterance},${subtopic},${id},${types},${dialogact},${emotion}\r\n`
+            fs.appendFileSync(file, data)
+        })(i)
+    }
+    res.redirect("/csvfile");
+});
 
 // export csv file, 
 router.post('/exportcsv', (req, res) => {
@@ -154,7 +220,7 @@ router.post('/exportcsv', (req, res) => {
             break
         if (row[0] == '"') {
             let word = row.lastIndexOf('"')
-            console.log("wodddd", row.substr( 0,word));
+            console.log("wodddd", row.substr(0, word));
             let str = row.substr(0, word + 1);
             utterance.push(str);
             let senti = row.substr(word + 2,)
@@ -186,7 +252,7 @@ router.post('/exportcsv', (req, res) => {
 
 
     fs.writeFileSync(file, data);
-    console.log("utttt", utterance);
+    //console.log("utttt", utterance);
     console.log("sentt", subtopic);
     for (let k = 0; k < len + 3; k++) {
         (function (k) {

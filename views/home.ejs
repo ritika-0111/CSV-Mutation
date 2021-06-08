@@ -1,0 +1,192 @@
+<%- include('header.ejs') %>
+    <style>
+        table {
+            font-family: arial, sans-serif;
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        td,
+        th {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #dddddd;
+        }
+    </style>
+
+
+    <body>
+
+        <h3 style="text-align: center; padding-top: 20px; padding-bottom: 20px;">CSV File</h3>
+        <div class="container">
+            <table>
+                <tr>
+                    <th>ID</th>
+                    <th>Utterance</th>
+                    <th>Sub-Topic</th>
+                    <th>Type</th>
+                    <th>Dialog_Act</th>
+                    <th>Emotion</th>
+                </tr>
+
+                <tr>
+                    <% if(utterance){%>
+                        <% if(utterance.length!=0){ let len=utterance.length %>
+                            <input type="text" class="form-control" name="csv_length" id="csv_length" value="<%= len%>"
+                                hidden>
+                            <% let i; for (i=0; i < utterance.length; i++) { %>
+
+                                <td>
+                                    <%= i %>
+                                </td>
+                                <td>
+                                    <%= utterance[i]%>
+                                </td>
+
+                                <td>
+
+
+                                    <% if((subtopic[i].length==0) || (subtopic[i].length==1)){ %>
+                                        <input type="text" class="form-control" name="sents<%= i%>" id="sents<%= i%>"
+                                            value="<%=i%>" hidden>
+
+                                        <select name="subtopics<%=i%>" id="subtopics<%=i%>">
+                                            <option value="routine">routine</option>
+                                            <option value="symp/reasoning">symp/reasoning</option>
+                                            <option value="story">story</option>
+                                            <option value="inactive">inactive</option>
+                                        </select>
+                                        <%}else{%>
+                                            <%= subtopic[i] %>
+                                                <%}%>
+                                </td>
+                                <td>
+                                    <%= types[i]%>
+                                </td>
+                                <td>
+                                    <%= dialogact[i]%>
+                                </td>
+
+                                <td>
+                                    <%= emotion[i]%>
+                                </td>
+                </tr>
+                <% }%>
+
+                    <%}%>
+                        <%}%>
+                            <tr>
+                                <td></td>
+                                <td>Reference Summary</td>
+                                <td><input type="text" class="form-control" name="summary" id="summary"
+                                        placeholder="Reference Summary">
+                                </td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td>Primary Topic</td>
+                                <td><input type="text" class="form-control" name="primary_topic" id="primary_topic"
+                                        placeholder="Primary Topic"></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td>Secondary Topic</td>
+                                <td><input type="text" class="form-control" name="secondary_topic" id="secondary_topic"
+                                        placeholder="Secondary Topic"></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+
+            </table><br><br>
+        </div>
+
+        <!-- /.container-fluid -->
+        <div class="col-sm-2 mb-3 mb-sm-0 mx-auto mt-5" style="text-align: right;">
+            <a id="editcsv"> <button onclick="editcsv()" class="btn btn-danger btn-user btn-block">Submit
+                </button></a>
+            <br>
+            <a id="gencsv"><button onclick="downloadcsv();" class="btn btn-dark btn-user btn-block">Generate
+                    CSV</button></a>
+            <br>
+            <a id="downloadCSV" class="d-none" href="/public/expcsv/new.csv" download><button
+                    class="btn btn-success btn-user btn-block">Download CSV</button>
+            </a>
+            <br><br>
+        </div>
+
+
+
+        <br><br>
+
+        <script type="text/javascript">
+            function downloadcsv() {
+                $("#gencsv").addClass("d-none");
+
+                $.ajax({
+                    url: "/exportcsv",
+                    method: "POST",
+                    data: {
+                        "primary_topic": $('#primary_topic').val(),
+                        "secondary_topic": $('#secondary_topic').val(),
+                        "summary": $('#summary').val(),
+                        "csv_length": $('#csv_length').val(),
+
+                    },
+                    success: function (response) {
+                        $("#downloadCSV").removeClass("d-none");
+                        $("#downloadCSV").click()
+
+                    }
+                });
+            }
+
+
+            function editcsv() {
+                $("#editcsv").addClass("d-none");
+
+                var choices = {};
+                var opt = $('#csv_length').val();
+                console.log('here', opt);
+                for (var i = 0; i < opt; i++) {
+                    console.log('i', i);
+                    let id = parseInt(i);
+                    // console.log("subtopics", document.getElementById('sents' + id));
+                    // console.log("subtopics222", $('#sents' + id).val());
+
+                    if (document.getElementById('sents' + id)) {
+                        let choice = $('#subtopics' + id).val();
+                        choices[id] = choice;
+                        console.log("choice", choice);
+                        //console.log("choices", choices);
+                    }
+                }
+
+                $.ajax({
+                    url: "/editcsv",
+                    method: "POST",
+                    data: choices,
+                    success: function (response) {
+                        $("#gencev").removeClass("d-none");
+                    }
+                });
+                // sessionStorage.setItem('lcs', JSON.stringify(choices))
+                // var selection = sessionStorage.getItem('lcs')
+                // console.log("selection", selection)
+                // let choicss = $('#subtopics4').val();
+                // console.log("sent", choicss)
+            }
+
+
+        </script>
+        <%- include('footer.ejs') %>
